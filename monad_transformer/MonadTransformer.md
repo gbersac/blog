@@ -67,7 +67,7 @@ for {
 } yield result
 ```
 
-We recieved `FutureEitherT[Error, Int] = FutureEitherT(Future(Success(Left(Error happened))))` which is what we were expecting ! But what if we want to chain, not Future, but `Option` of `Either ? Or any custom type which contain value when that value is an `Either` ? Let's abstract out `FutureEitherT` so that we could replace `Future` by any other type.
+We recieved `FutureEitherT[Error, Int] = FutureEitherT(Future(Success(Left(Error happened))))` which is what we were expecting ! But what if we want to chain, not Future, but `Option` of `Either` ? Or any custom type which contain value when that value is an `Either` ? Let's abstract out `FutureEitherT` so that we could replace `Future` by any other type.
 
 ### Composing monads
 Not every type is eligible for the `Either` composition chain. First, it must contain value of type either, then we have to implement the `map` and `flatMap` function for it. This looks like the definition of a monad.
@@ -159,7 +159,7 @@ case class OptionT[F[_], S](value: F[Option[S]])(implicit monad: Monad[F]) {
 ```
 
 ### Synthax sugars
-This is great but there is still some useless verobsity that deserve to be erased. For instance, if I have a query which return a future of raw value (for read queries for instace), and I want to chain it with write queries, I must write it :
+This is great but there is still some useless verobsity that deserved to be cleared. For instance, if I have a query which return a future of raw value (for read queries for instace), and I want to chain it with write queries, I must write it :
 
 ```scala
 def readQuery: Future[String] = Future.successful("Something extracted from DB")
@@ -169,7 +169,7 @@ for {
 } yield ()
 ```
 
-We can shorten this using the pimp my library pattern :
+We can shorten this using the [pimp my library](https://coderwall.com/p/k_1jzw/scala-s-pimp-my-library-pattern-example) pattern :
 
 ```scala
 implicit class FutureEitherToEitherT[E, S](f: Future[Either[E, S]]) {
@@ -194,4 +194,4 @@ for {
 ```
 
 ## Conclusion
-This is an article which explore the [cats EitherT](https://github.com/typelevel/cats/blob/master/core/src/main/scala/cats/data/EitherT.scala) function we are using at work. This as proven to be very usefull and recommand using it.
+This is an article which explore the [cats EitherT](https://github.com/typelevel/cats/blob/master/core/src/main/scala/cats/data/EitherT.scala) class we are using at work. This as proven to be very usefull and recommand using it.
