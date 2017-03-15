@@ -4,7 +4,7 @@ In most enterprise applications, we have many db calls. At work we have precise 
 - all write queries must return a `Future[Either[E, s]]`
 - all read queries must return a `Future[Option[S]]` or `Future[List[S]]`.
 
-Since some action involve more than one write queries and that we often don't want to trigger a second query if the first failed, instead we'd like to chain them, that is doing one after another. We want to chain them, but only if the `Future` is successful and the `Either` is right. For exemple :
+Since some action involve more than one write queries and that we often don't want to trigger a second query if the first failed, instead we'd like to chain them, that is doing one after another. We want to chain them, but only if the `Future` is successful and the `Either` is right. For example :
 
 ```scala
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,11 +37,11 @@ for {
 } yield 42
 ```
 
-It return a successful `Future` while `queryError` returned a `Left`, that's not what we expect ! That's where we need a new abstraction called Monad Transformer.
+It returns a successful `Future` while `queryError` returned a `Left`. Instead, we are expecting a successful `Future` of `Left` ! That's where we need a new abstraction called Monad Transformer.
 
 ## Solution
 ### Composing `Future` of `Either`
-In order to use for comprehension, we need one structure which handle the functions `map` and `flatMap`. Let's call it `FutureEitherT` for "future of either Transformer". This structure take a 'Future[Either[E, S]]' and flatMap/map with another `FutureEitherT` only if the future is successful and the either is right.
+In order to use for comprehension, we need one structure which handles the functions `map` and `flatMap`. Let's call it `FutureEitherT` for "future of either Transformer". This structure take a 'Future[Either[E, S]]' and flatMap/map with another `FutureEitherT` only if the future is successful and the either is right.
 
 ```scala
 case class FutureEitherT[E, S](value: Future[Either[E, S]]) {
@@ -67,13 +67,22 @@ for {
 } yield result
 ```
 
-We recieved `FutureEitherT[Error, Int] = FutureEitherT(Future(Success(Left(Error happened))))` which is what we were expecting ! But what if we want to chain, not Future, but `Option` of `Either` ? Or any custom type which contain value when that value is an `Either` ? Let's abstract out `FutureEitherT` so that we could replace `Future` by any other type.
+We recieved `FutureEitherT[Error, Int] = FutureEitherT(Future(Success(Left(Error happened))))`, that's what we were expecting ! But what if we want to chain, not Future, but `Option` of `Either` ? Or any custom type which contains value when that value is an `Either` ? As we can see this is the same pattern, only with `Option` instead of `Future` :
+
+```scala
+for {
+  _ <- Option(Left("Error"))
+  _ <- Option(Right(42))
+} yield ()
+```
+
+Let's abstract out `FutureEitherT` so that we could replace `Future` by any other type.
 
 ### Composing monads
 Not every type is eligible for the `Either` composition chain. First, it must contain value of type either, then we have to implement the `map` and `flatMap` function for it. This looks like the definition of a monad.
 
 #### Monad definition
-A monad is a type constructor (functor) which associate `flatMap` and `unit` (`pure` in cats) to the type (type `F`) :
+A monad is a type constructor (functor) that associates `flatMap` and `unit` (`pure` in cats) to the type (type `F`) :
 
 ```scala
 trait Monad[F[_]] {
@@ -142,8 +151,8 @@ case class OptionT[F[_], S](value: F[Option[S]])(implicit monad: Monad[F]) {
 }
 ```
 
-### Syntax sugars
-This is great but there is still some useless verobsity that deserved to be cleared. For instance, if I have a query which return a future of raw value (for read queries for instace), and I want to chain it with write queries, I must write this :
+### Syntactic sugars
+This is great but there is still some useless verobsity that deserved to be cleared. For instance, if I have a query which returns a future of raw value (for read queries for instace), and I want to chain it with write queries, I must write this :
 
 ```scala
 def readQuery: Future[String] = Future.successful("Something extracted from DB")
@@ -178,4 +187,4 @@ for {
 ```
 
 ## Conclusion
-This is an article which explore the [cats EitherT](https://github.com/typelevel/cats/blob/master/core/src/main/scala/cats/data/EitherT.scala) class. We use it work and it was very usefull and I recommand using it.
+In this article we explored the [cats EitherT](https://github.com/typelevel/cats/blob/master/core/src/main/scala/cats/data/EitherT.scala) class. We use it at work and it was very usefull. I recommand using it.
