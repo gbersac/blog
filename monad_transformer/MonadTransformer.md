@@ -76,7 +76,7 @@ Not every type is eligible for the `Either` composition chain. First, it must co
 A monad is a type constructor (functor) which associate `flatMap` and `unit` (`pure` in cats) to the type (type `F`) :
 
 ```scala
-trait Monad[F[_]] extends Functor[F] {
+trait Monad[F[_]] {
   def unit[A](a: => A): F[A]
   def flatMap[A,B](ma: F[A])(f: A => F[B]): F[B]
 
