@@ -159,7 +159,7 @@ case class OptionT[F[_], S](value: F[Option[S]])(implicit monad: Monad[F]) {
 ```
 
 ### Synthax sugars
-This is great but there is still some useless verobsity that deserved to be cleared. For instance, if I have a query which return a future of raw value (for read queries for instace), and I want to chain it with write queries, I must write it :
+This is great but there is still some useless verobsity that deserved to be cleared. For instance, if I have a query which return a future of raw value (for read queries for instace), and I want to chain it with write queries, I must write this :
 
 ```scala
 def readQuery: Future[String] = Future.successful("Something extracted from DB")
@@ -194,4 +194,4 @@ for {
 ```
 
 ## Conclusion
-This is an article which explore the [cats EitherT](https://github.com/typelevel/cats/blob/master/core/src/main/scala/cats/data/EitherT.scala) class we are using at work. This as proven to be very usefull and recommand using it.
+This is an article which explore the [cats EitherT](https://github.com/typelevel/cats/blob/master/core/src/main/scala/cats/data/EitherT.scala) class. We use it work and it was very usefull and I recommand using it.
