@@ -142,7 +142,7 @@ case class OptionT[F[_], S](value: F[Option[S]])(implicit monad: Monad[F]) {
 }
 ```
 
-### Synthax sugars
+### Syntax sugars
 This is great but there is still some useless verobsity that deserved to be cleared. For instance, if I have a query which return a future of raw value (for read queries for instace), and I want to chain it with write queries, I must write this :
 
 ```scala
